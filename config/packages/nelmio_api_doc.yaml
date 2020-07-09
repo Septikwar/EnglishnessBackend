@@ -1,9 +1,18 @@
 nelmio_api_doc:
     documentation:
+        #        schemes: [http, https]
         info:
-            title: My App
-            description: This is an awesome app!
+            title: Symfony JWT API
+            description: Symfony JWT API docs
             version: 1.0.0
+        securityDefinitions:
+            Bearer:
+                type: apiKey
+                description: 'Authorization: Bearer {jwt}'
+                name: Authorization
+                in: header
+        security:
+            - Bearer: []
     areas: # to filter documented areas
         path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+            - ^/api(?!/doc$) # Accepts routes under /api except
