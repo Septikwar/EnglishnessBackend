@@ -12,11 +12,10 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Swagger\Annotations as SWG;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\PropertyAccess\Exception\InvalidArgumentException as InvalidArgumentExceptionAlias;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
@@ -91,11 +90,15 @@ class UserController extends AbstractFOSRestController
             }
         } catch (UniqueConstraintViolationException $e) {
             return new JsonResponse([
-                'error' => 'Такой пользователь уже существует'
+                'error' => $e->getMessage()
             ], 400);
         } catch (NotNullConstraintViolationException $e) {
             return new JsonResponse([
-                'error' => 'Не заполнены обязательные поля'
+                'error' => $e->getMessage()
+            ], 400);
+        } catch (InvalidArgumentExceptionAlias $e) {
+            return new JsonResponse([
+                'error' => $e->getMessage()
             ], 400);
         }
 
