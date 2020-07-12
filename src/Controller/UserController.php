@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Exception\NotNullConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -84,10 +85,18 @@ class UserController extends AbstractFOSRestController
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
 
-                return new Response('Пользователь создан', 200);
+                return new JsonResponse([
+                    'success' => 'Пользователь создан'
+                ], 200);
             }
         } catch (UniqueConstraintViolationException $e) {
-            throw new BadRequestHttpException('Такой пользователь уже существует');
+            return new JsonResponse([
+                'error' => 'Такой пользователь уже существует'
+            ], 400);
+        } catch (NotNullConstraintViolationException $e) {
+            return new JsonResponse([
+                'error' => 'Не заполнены обязательные поля'
+            ], 400);
         }
 
         return $form;
