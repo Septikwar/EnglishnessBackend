@@ -12,6 +12,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Swagger\Annotations as SWG;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -81,28 +82,50 @@ class UserController extends AbstractFOSRestController
             $form = $this->createForm(UserType::class, $user);
             $form->submit($data);
             if ($form->isValid()) {
+
+                $user->setPassword(
+                  $this->encoder->encodePassword(
+                      $user,
+                      $data['password']
+                  )
+                );
+
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
 
                 return new JsonResponse([
-                    'success' => 'Пользователь создан'
+                    'data' => [],
+                    'errorCode' => 0,
+                    'errorMsgs' => ''
                 ], 200);
             }
         } catch (UniqueConstraintViolationException $e) {
             return new JsonResponse([
-                'error' => $e->getMessage()
+                'data' => [],
+                'errorCode' => 0,
+                'errorMsgs' => $e->getMessage()
             ], 400);
         } catch (NotNullConstraintViolationException $e) {
             return new JsonResponse([
-                'error' => $e->getMessage()
+                'data' => [],
+                'errorCode' => 0,
+                'errorMsgs' => $e->getMessage()
             ], 400);
         } catch (InvalidArgumentExceptionAlias $e) {
             return new JsonResponse([
-                'error' => $e->getMessage()
+                'data' => [],
+                'errorCode' => 0,
+                'errorMsgs' => $e->getMessage()
             ], 400);
         }
 
-        return $form;
+        $errors = $this->getErrorsFromForm($form);
+
+        return new JsonResponse([
+            'data' => [],
+            'errorCode' => 0,
+            'errorMsgs' => $errors
+        ], 400);
     }
 
     /**
@@ -116,5 +139,16 @@ class UserController extends AbstractFOSRestController
 
         $user = $this->repository->findUserByEmailOrUsername($account);
 
+    }
+
+    private function getErrorsFromForm(FormInterface $form)
+    {
+        $errors = [];
+
+        foreach ($form->getErrors(true) as $error) {
+            $errors[] = $error->getMessage();
+        }
+
+        return $errors;
     }
 }
