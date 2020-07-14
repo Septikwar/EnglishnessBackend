@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\Validator\Constraints\UserPassword;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -17,6 +18,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class User implements UserInterface
 {
+    public const ROLE_USER = 'ROLE_USER';
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -26,6 +29,7 @@ class User implements UserInterface
     private $id;
 
     /**
+     * @Assert\Length(min="5", minMessage="Минимальное количество символов - 5")
      * @Assert\NotBlank(message="Ник не заполнен")
      * @ORM\Column(type="string", length=100, unique=true)
      * @Groups({"public"})
@@ -33,6 +37,7 @@ class User implements UserInterface
     private $username;
 
     /**
+     * @Assert\Length(min="5", minMessage="Минимальное количество символов - 5")
      * @Assert\Email(message="E-mail неправильного формата")
      * @Assert\NotBlank(message="E-mail не заполнен")
      * @ORM\Column(type="string", length=180, unique=true)
@@ -47,10 +52,65 @@ class User implements UserInterface
 
     /**
      * @var string The hashed password
+     * @Assert\Length(min="8", minMessage="Минимальное количество символов - 8")
      * @Assert\NotBlank(message="Пароль не заполнен")
      * @ORM\Column(type="string")
      */
     private $password;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $confirmationCode;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(type="boolean")
+     */
+    private $enabled;
+
+
+    public function __construct()
+    {
+        $this->roles = [self::ROLE_USER];
+        $this->enabled = false;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getConfirmationCode(): string
+    {
+        return $this->confirmationCode;
+    }
+
+    /**
+     * @param string $confirmationCode
+     */
+    public function setConfirmationCode(string $confirmationCode): void
+    {
+        $this->confirmationCode = $confirmationCode;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * @param bool $enabled
+     */
+    public function setEnabled(bool $enabled): void
+    {
+        $this->enabled = $enabled;
+    }
 
     public function getId(): ?int
     {
@@ -83,7 +143,6 @@ class User implements UserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
@@ -116,7 +175,7 @@ class User implements UserInterface
      */
     public function getSalt()
     {
-        // not needed when using the "bcrypt" algorithm in security.yaml
+        return null;
     }
 
     /**
