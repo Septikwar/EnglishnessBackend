@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
+use App\Service\CodeGenerator;
+use App\Service\Mailer;
 use Doctrine\DBAL\Exception\NotNullConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -72,7 +74,7 @@ class UserController extends AbstractFOSRestController
      * @param Request $request
      * @return Response
      */
-    public function registerUser(Request $request)
+    public function registerUser(Request $request, CodeGenerator $codeGenerator, Mailer $mailer)
     {
         $user = new User($this->encoder);
 
@@ -89,9 +91,12 @@ class UserController extends AbstractFOSRestController
                       $data['password']
                   )
                 );
+                $user->setConfirmationCode($codeGenerator->getConfirmationCode());
 
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
+
+                $mailer->sendConfirmationMessage($user);
 
                 return new JsonResponse([
                     'data' => [],
@@ -126,6 +131,39 @@ class UserController extends AbstractFOSRestController
             'errorCode' => 0,
             'errorMsgs' => $errors
         ], 400);
+    }
+
+    /**
+     * @Rest\Get("/confirm/{code}", name="email_confirmation")
+     * @param UserRepository $userRepository
+     * @param string $code
+     * @return Response
+     */
+    public function confirmEmail(UserRepository $userRepository, string $code)
+    {
+        /** @var User $user */
+        $user = $userRepository->findOneBy(['confirmationCode' => $code]);
+
+        if ($user === null) {
+            return new JsonResponse([
+                'data' => [],
+                'errorCode' => 0,
+                'errorMsgs' => 'Пользователь не найден'
+            ], 404);
+        }
+
+        $user->setEnabled(true);
+        $user->setConfirmationCode('');
+
+        $em = $this->getDoctrine()->getManager();
+
+        $em->flush();
+
+        return new JsonResponse([
+            'data' => [],
+            'errorCode' => 0,
+            'errorMsgs' => ''
+        ], 200);
     }
 
     /**
