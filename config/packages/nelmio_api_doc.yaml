@@ -2,7 +2,7 @@ nelmio_api_doc:
     documentation:
         #        schemes: [http, https]
         info:
-            title: Symfony JWT API
+            title: English API
             description: Symfony JWT API docs
             version: 1.0.0
         securityDefinitions:
@@ -13,6 +13,9 @@ nelmio_api_doc:
                 in: header
         security:
             - Bearer: []
+        tags:
+            - name: "User"
+              description: "User endpoints"
     areas: # to filter documented areas
         path_patterns:
             - ^/api(?!/doc$) # Accepts routes under /api except
