@@ -66,6 +66,7 @@ class UserController extends AbstractFOSRestController
      *         )
      *     )
      * )
+     * @SWG\Tag(name="User")
      * @SWG\Response(
      *     response="200",
      *     description="Создает пользователя",
@@ -134,7 +135,13 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
-     * @Rest\Get("/confirm/{code}", name="email_confirmation")
+     * @Rest\Get("/user/confirm/{code}", name="email_confirmation")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Подтверждение E-mail пользователя",
+     *     @Model(type=User::class)
+     * )
+     * @SWG\Tag(name="User")
      * @param UserRepository $userRepository
      * @param string $code
      * @return Response
@@ -167,6 +174,12 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * @SWG\Response(
+     *     response="200",
+     *     description="Сброс пароля пользователя",
+     *     @Model(type=User::class)
+     * )
+     * @SWG\Tag(name="User")
      * @Rest\Post("/user/password/reset")
      * @param Request $request
      */

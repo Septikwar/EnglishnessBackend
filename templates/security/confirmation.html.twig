@@ -10,7 +10,7 @@
 <body>
 <div class="container">
     <p>Добро пожаловать, {{ user.username }}!</p>
-    <p>Чтобы завершить регистрацию, подтвердите <a href="https://screator.info/{{ path('email_confirmation', {'code': user.confirmationCode }) }}">электронный адрес</a></p>
+    <p>Чтобы завершить регистрацию, подтвердите <a href="https://screator.info{{ path('email_confirmation', {'code': user.confirmationCode }) }}">электронный адрес</a></p>
 </div>
 </body>
 </html>
