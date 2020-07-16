@@ -30,6 +30,7 @@ class User implements UserInterface
 
     /**
      * @Assert\Length(min="5", minMessage="Минимальное количество символов - 5")
+     * @Assert\Regex(pattern="/^[a-zA-Z0-9_]+$/", message="Ник должен содержать в себе цифры и/или буквы на латинице")
      * @Assert\NotBlank(message="Ник не заполнен")
      * @ORM\Column(type="string", length=100, unique=true)
      * @Groups({"public"})
@@ -51,7 +52,9 @@ class User implements UserInterface
     private $roles = [];
 
     /**
+     * TODO вырезать кириллицу
      * @var string The hashed password
+     * @Assert\Regex(pattern="/^(?=.*[a-z])(?=.*\d).{8,}$/i", message="Пароль должен содержать в себе цифры и буквы")
      * @Assert\Length(min="8", minMessage="Минимальное количество символов - 8")
      * @Assert\NotBlank(message="Пароль не заполнен")
      * @ORM\Column(type="string")
