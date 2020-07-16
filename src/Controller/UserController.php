@@ -154,8 +154,7 @@ class UserController extends AbstractFOSRestController
      * @Rest\Get("/user/confirm/{code}", name="email_confirmation")
      * @SWG\Response(
      *     response="200",
-     *     description="Подтверждение E-mail пользователя",
-     *     @Model(type=User::class)
+     *     description="Подтверждение E-mail пользователя"
      * )
      * @SWG\Tag(name="User")
      * @param UserRepository $userRepository
