@@ -53,6 +53,7 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * @SWG\Tag(name="User")
      * @Rest\Post("/user/login")
      * @SWG\Parameter(
      *     name="body",
