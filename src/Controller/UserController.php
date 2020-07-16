@@ -174,6 +174,7 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * TODO запилить ресет через эмейл
      * @SWG\Response(
      *     response="200",
      *     description="Сброс пароля пользователя",
