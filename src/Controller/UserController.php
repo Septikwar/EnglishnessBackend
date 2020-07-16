@@ -53,24 +53,40 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * @Rest\Post("/user/login")
+     * @SWG\Parameter(
+     *     name="body",
+     *     in="body",
+     *     @SWG\Schema(
+     *         @SWG\Property(property="username", type="string"),
+     *         @SWG\Property(property="email", type="string"),
+     *         @SWG\Property(property="password", type="string")
+     *     )
+     * )
+     * @SWG\Response(
+     *     response="200",
+     *     description="Авторизация пользователя"
+     * )
+     * @return void
+     */
+    public function loginUser()
+    {}
+
+    /**
      * @Rest\Post("/user/register")
      * @SWG\Parameter(
      *     name="body",
      *     in="body",
      *     @SWG\Schema(
-     *         type="object",
-     *         @SWG\Property(
-     *             property="user",
-     *             type="object",
-     *             ref=@Model(type=User::class, groups={})
-     *         )
+     *         @SWG\Property(property="username", type="string"),
+     *         @SWG\Property(property="email", type="string"),
+     *         @SWG\Property(property="password", type="string")
      *     )
      * )
      * @SWG\Tag(name="User")
      * @SWG\Response(
      *     response="200",
-     *     description="Создает пользователя",
-     *     @Model(type=User::class)
+     *     description="Создает пользователя"
      * )
      * @param Request $request
      * @return Response
@@ -138,8 +154,7 @@ class UserController extends AbstractFOSRestController
      * @Rest\Get("/user/confirm/{code}", name="email_confirmation")
      * @SWG\Response(
      *     response="200",
-     *     description="Подтверждение E-mail пользователя",
-     *     @Model(type=User::class)
+     *     description="Подтверждение E-mail пользователя"
      * )
      * @SWG\Tag(name="User")
      * @param UserRepository $userRepository
