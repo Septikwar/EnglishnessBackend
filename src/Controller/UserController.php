@@ -7,6 +7,7 @@ use App\Form\UserType;
 use App\Repository\UserRepository;
 use App\Service\CodeGenerator;
 use App\Service\Mailer;
+use App\Service\Services;
 use Doctrine\DBAL\Exception\NotNullConstraintViolationException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,15 +42,22 @@ class UserController extends AbstractFOSRestController
      */
     private $encoder;
 
+    /**
+     * @var Services
+     */
+    private $services;
+
     public function __construct(
         UserRepository $repository,
         EntityManagerInterface $entityManager,
-        UserPasswordEncoderInterface $encoder
+        UserPasswordEncoderInterface $encoder,
+        Services $services
     )
     {
         $this->repository = $repository;
         $this->entityManager = $entityManager;
         $this->encoder = $encoder;
+        $this->services = $services;
     }
 
     /**
@@ -125,7 +133,7 @@ class UserController extends AbstractFOSRestController
             ], 400);
         }
 
-        $errors = $this->getErrorsFromForm($form);
+        $errors = $this->services->getErrorsFromForm($form);
 
         return new JsonResponse([
             'data' => [],
@@ -191,16 +199,5 @@ class UserController extends AbstractFOSRestController
 
         $user = $this->repository->findUserByEmailOrUsername($account);
 
-    }
-
-    private function getErrorsFromForm(FormInterface $form)
-    {
-        $errors = [];
-
-        foreach ($form->getErrors(true) as $error) {
-            $errors[] = $error->getMessage();
-        }
-
-        return $errors;
     }
 }
