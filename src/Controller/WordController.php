@@ -137,7 +137,11 @@ class WordController extends AbstractFOSRestController
      *     @SWG\Schema(
      *         @SWG\Property(property="en", type="string"),
      *         @SWG\Property(property="ru", type="string"),
-     *         @SWG\Property(property="groups", type="array")
+     *         @SWG\Property(property="groups", type="array",
+     *             @SWG\Items(
+     *                 @SWG\Property(property="id", type="integer"),
+     *             )
+     *         )
      *     )
      * )
      * @SWG\Response(
@@ -184,7 +188,8 @@ class WordController extends AbstractFOSRestController
     }
 
     /**
-     * @SWG\Tag(name="Word")
+     * @Rest\View(serializerGroups={"Word"})
+     * @SWG\Tag(name="Words")
      * @Rest\Patch("/word/{id}")
      * @SWG\Parameter(
      *     name="body",
@@ -192,7 +197,11 @@ class WordController extends AbstractFOSRestController
      *     @SWG\Schema(
      *         @SWG\Property(property="en", type="string"),
      *         @SWG\Property(property="ru", type="string"),
-     *         @SWG\Property(property="groups", type="array")
+     *         @SWG\Property(property="groups", type="array",
+     *             @SWG\Items(
+     *                 @SWG\Property(property="id", type="integer"),
+     *             )
+     *         )
      *     )
      * )
      * @SWG\Response(
@@ -250,7 +259,7 @@ class WordController extends AbstractFOSRestController
     }
 
     /**
-     * @SWG\Tag(name="Word")
+     * @SWG\Tag(name="Words")
      * @Rest\Delete("/word/{id}")
      * @SWG\Response(
      *     response="200",
