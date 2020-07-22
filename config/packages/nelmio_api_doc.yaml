@@ -16,6 +16,10 @@ nelmio_api_doc:
         tags:
             - name: "User"
               description: "User endpoints"
+            - name: "Groups"
+              description: "Word groups endpoints"
+            - name: "Words"
+              description: "Words endpoints"
     areas: # to filter documented areas
         path_patterns:
             - ^/api(?!/docs|/contexts|/{index}|/doc$) # Accepts routes under /api except
