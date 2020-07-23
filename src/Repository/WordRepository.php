@@ -56,6 +56,21 @@ class WordRepository extends EntityRepository
         return $qb->getQuery()->getArrayResult();
     }
 
+    public function findAllWordsInGroups(array $ids)
+    {
+        $qb = $this->_em->createQueryBuilder();
+
+        $qb
+            ->select('w')
+            ->from(Word::class, 'w')
+            ->leftJoin('w.groups', 'g')
+            ->where('g.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->orderBy('w.en');
+
+        return $qb->distinct()->getQuery()->getArrayResult();
+    }
+
     public function deleteWord($id)
     {
         $qb = $this->_em->createQueryBuilder();
