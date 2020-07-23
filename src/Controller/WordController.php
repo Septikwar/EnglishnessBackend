@@ -49,54 +49,6 @@ class WordController extends AbstractFOSRestController
     }
 
     /**
-     * @SWG\Tag(name="Words")
-     * @Rest\Get("/word/groups")
-     * @Rest\QueryParam(
-     *     name="id",
-     *     nullable=false
-     * )
-     * @SWG\Response(
-     *     response="200",
-     *     description="Вывод слов в выбранных группах",
-     *     @Model(type=Word::class)
-     * )
-     * @param ParamFetcherInterface $paramFetcher
-     * @return JsonResponse
-     */
-    public function getAllWordsInGroups(ParamFetcherInterface $paramFetcher)
-    {
-        $repository = $this->repository;
-
-        $ids = $paramFetcher->get('id');
-
-        if (is_array($ids)) {
-            foreach ($ids as $key => $val) {
-                if (!is_numeric($val)) {
-                    return new JsonResponse([
-                        'data' => '',
-                        'errorCode' => 0,
-                        'errorMsgs' => 'В id могут находиться только целые числа'
-                    ], 400);
-                }
-            }
-        } else {
-            return new JsonResponse([
-                'data' => '',
-                'errorCode' => 0,
-                'errorMsgs' => 'Не передан массив id'
-            ], 400);
-        }
-
-        $data = $repository->findAllWordsInGroups($ids);
-
-        return new JsonResponse([
-            'data' => $data,
-            'errorCode' => 0,
-            'errorMsgs' => ''
-        ], 200);
-    }
-
-    /**
      * @Rest\View(serializerGroups={"Word"})
      * @SWG\Tag(name="Words")
      * @Rest\Get("/word/{id}")
@@ -151,6 +103,10 @@ class WordController extends AbstractFOSRestController
      *     default="1",
      *     strict=true
      * )
+     * @Rest\QueryParam(
+     *     name="id",
+     *     nullable=false
+     * )
      * @SWG\Response(
      *     response="200",
      *     description="Вывод всех слов",
@@ -163,10 +119,38 @@ class WordController extends AbstractFOSRestController
     {
         $repository = $this->repository;
 
-        $data = $repository->findAllWords(
-            $paramFetcher->get('pagesize'),
-            $paramFetcher->get('page')
-        );
+        $ids = $paramFetcher->get('id');
+
+        if (isset($ids) && !empty($ids)) {
+            if (is_array($ids)) {
+                foreach ($ids as $key => $val) {
+                    if (!is_numeric($val)) {
+                        return new JsonResponse([
+                            'data' => '',
+                            'errorCode' => 0,
+                            'errorMsgs' => 'В id могут находиться только целые числа'
+                        ], 400);
+                    }
+                }
+            } else {
+                return new JsonResponse([
+                    'data' => '',
+                    'errorCode' => 0,
+                    'errorMsgs' => 'Не передан массив id'
+                ], 400);
+            }
+
+            $data = $repository->findAllWordsInGroups(
+                $ids,
+                $paramFetcher->get('pagesize'),
+                $paramFetcher->get('page')
+            );
+        } else {
+            $data = $repository->findAllWords(
+                $paramFetcher->get('pagesize'),
+                $paramFetcher->get('page')
+            );
+        }
 
         return new JsonResponse([
             'data' => $data,
