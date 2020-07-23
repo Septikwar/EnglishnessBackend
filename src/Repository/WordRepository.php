@@ -56,7 +56,7 @@ class WordRepository extends EntityRepository
         return $qb->getQuery()->getArrayResult();
     }
 
-    public function findAllWordsInGroups(array $ids)
+    public function findAllWordsInGroups(array $ids, int $pagesize = 10, int $page = 1)
     {
         $qb = $this->_em->createQueryBuilder();
 
@@ -66,7 +66,9 @@ class WordRepository extends EntityRepository
             ->leftJoin('w.groups', 'g')
             ->where('g.id IN (:ids)')
             ->setParameter('ids', $ids)
-            ->orderBy('w.en');
+            ->orderBy('w.en')
+            ->setFirstResult($pagesize * ($page - 1))
+            ->setMaxResults($pagesize);
 
         return $qb->distinct()->getQuery()->getArrayResult();
     }
