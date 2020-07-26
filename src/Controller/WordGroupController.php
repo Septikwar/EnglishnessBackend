@@ -26,6 +26,9 @@ use Symfony\Component\Validator\Constraints\Json;
  */
 class WordGroupController extends AbstractFOSRestController
 {
+
+    CONST IMAGE_PATH = 'uploads/images/';
+
     /**
      * @var WordGroupRepository
      */
@@ -153,7 +156,7 @@ class WordGroupController extends AbstractFOSRestController
                     $uploadImage = new UploadFile($decodeImage, 'image');
                     $fileName = md5(uniqid()).'.'.$uploadImage->guessExtension();
                     $uploadImage->move($this->getParameter('image_directory'), $fileName);
-                    $wordGroup->setImage($fileName);
+                    $wordGroup->setImage(self::IMAGE_PATH.$fileName);
                 }
 
                 $this->em->persist($wordGroup);
@@ -218,7 +221,7 @@ class WordGroupController extends AbstractFOSRestController
                     $uploadImage = new UploadFile($decodeImage, 'image');
                     $fileName = md5(uniqid()).'.'.$uploadImage->guessExtension();
                     $uploadImage->move($this->getParameter('image_directory'), $fileName);
-                    $wordGroup->setImage($fileName);
+                    $wordGroup->setImage(self::IMAGE_PATH.$fileName);
                 }
 
                 $this->em->persist($wordGroup);
