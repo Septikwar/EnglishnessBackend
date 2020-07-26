@@ -163,7 +163,11 @@ class WordGroupController extends AbstractFOSRestController
             }
             return $form;
         } catch (\Exception $e) {
-            throw new $e;
+            return new JsonResponse([
+                'data' => $e->getMessage(),
+                'errorCode' => 0,
+                'errorMsgs' => ''
+            ], 200);
         }
     }
 
