@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Entity\WordGroup;
 use App\Repository\WordRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -23,10 +22,10 @@ class Word
     private $id;
 
     /**
-     * @Groups({"Word"})
      * @Assert\NotNull()
      * @Assert\NotBlank()
      * @ORM\Column(type="string", length=255)
+     * @Groups({"Word"})
      */
     private $en;
 
