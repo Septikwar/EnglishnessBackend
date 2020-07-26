@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Constraints\Json;
 class WordGroupController extends AbstractFOSRestController
 {
 
-    CONST IMAGE_PATH = 'uploads/images/';
+    CONST IMAGE_PATH = '/uploads/images/';
 
     /**
      * @var WordGroupRepository
