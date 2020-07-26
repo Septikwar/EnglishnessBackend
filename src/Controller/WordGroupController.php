@@ -7,7 +7,9 @@ namespace App\Controller;
 use App\Entity\WordGroup;
 use App\Form\WordGroupType;
 use App\Repository\WordGroupRepository;
+use App\Service\Base64FileExtractor;
 use App\Service\Services;
+use App\Service\UploadFile;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -144,6 +146,16 @@ class WordGroupController extends AbstractFOSRestController
             $form->handleRequest($request);
             $form->submit($data);
             if ($form->isValid()) {
+
+
+                if (!empty($data['image'])) {
+                    $decodeImage = (new Base64FileExtractor)->extractBase64String($data['image']);
+                    $uploadImage = new UploadFile($decodeImage, 'image');
+                    $fileName = md5(uniqid()).'.'.$uploadImage->guessExtension();
+                    $uploadImage->move($this->getParameter('image_directory'), $fileName);
+                    $wordGroup->setImage($fileName);
+                }
+
                 $this->em->persist($wordGroup);
                 $this->em->flush();
 
@@ -191,11 +203,20 @@ class WordGroupController extends AbstractFOSRestController
 
             $form = $this->createForm(WordGroupType::class, $wordGroup, [
                 'method' => 'PATCH',
-                'em' => $this->e
+                'em' => $this->em
             ]);
             $form->handleRequest($request);
             $form->submit($data);
             if ($form->isValid()) {
+
+                if (!empty($data['image'])) {
+                    $decodeImage = (new Base64FileExtractor)->extractBase64String($data['image']);
+                    $uploadImage = new UploadFile($decodeImage, 'image');
+                    $fileName = md5(uniqid()).'.'.$uploadImage->guessExtension();
+                    $uploadImage->move($this->getParameter('image_directory'), $fileName);
+                    $wordGroup->setImage($fileName);
+                }
+
                 $this->em->persist($wordGroup);
                 $this->em->flush();
 
