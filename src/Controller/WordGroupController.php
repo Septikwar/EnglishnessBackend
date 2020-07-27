@@ -19,7 +19,6 @@ use Swagger\Annotations as SWG;
 use Symfony\Component\Form\FormInterface as FormInterfaceAlias;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Validator\Constraints\Json;
 
 /**
  * @Rest\Route("/api")
@@ -133,7 +132,7 @@ class WordGroupController extends AbstractFOSRestController
      *     @Model(type=WordGroup::class)
      * )
      * @param Request $request
-     * @return WordGroup|FormInterfaceAlias
+     * @return WordGroup|FormInterfaceAlias|JsonResponse
      */
     public function createWordGroup(Request $request)
     {
@@ -152,11 +151,15 @@ class WordGroupController extends AbstractFOSRestController
 
 
                 if (!empty($data['image'])) {
-                    $decodeImage = (new Base64FileExtractor)->extractBase64String($data['image']);
-                    $uploadImage = new UploadFile($decodeImage, 'image');
-                    $fileName = md5(uniqid()).'.'.$uploadImage->guessExtension();
-                    $uploadImage->move($this->getParameter('image_directory'), $fileName);
-                    $wordGroup->setImage(self::IMAGE_PATH.$fileName);
+                    $errorsImage = $this->checkUploadImage($wordGroup, $data['image']);
+
+                    if (!empty($errorsImage)) {
+                        return new JsonResponse([
+                            'data' => '',
+                            'errorCode' => 0,
+                            'errorMsgs' => $errorsImage
+                        ], 400);
+                    }
                 }
 
                 $this->em->persist($wordGroup);
@@ -167,9 +170,9 @@ class WordGroupController extends AbstractFOSRestController
             return $form;
         } catch (\Exception $e) {
             return new JsonResponse([
-                'data' => $e->getMessage(),
+                'data' => '',
                 'errorCode' => 0,
-                'errorMsgs' => ''
+                'errorMsgs' => $e->getMessage()
             ], 200);
         }
     }
@@ -217,11 +220,15 @@ class WordGroupController extends AbstractFOSRestController
             if ($form->isValid()) {
 
                 if (!empty($data['image'])) {
-                    $decodeImage = (new Base64FileExtractor)->extractBase64String($data['image']);
-                    $uploadImage = new UploadFile($decodeImage, 'image');
-                    $fileName = md5(uniqid()).'.'.$uploadImage->guessExtension();
-                    $uploadImage->move($this->getParameter('image_directory'), $fileName);
-                    $wordGroup->setImage(self::IMAGE_PATH.$fileName);
+                    $errorsImage = $this->checkUploadImage($wordGroup, $data['image']);
+
+                    if (!empty($errorsImage)) {
+                        return new JsonResponse([
+                            'data' => '',
+                            'errorCode' => 0,
+                            'errorMsgs' => $errorsImage
+                        ], 400);
+                    }
                 }
 
                 $this->em->persist($wordGroup);
@@ -245,6 +252,39 @@ class WordGroupController extends AbstractFOSRestController
                 'errorMsgs' => $e->getMessage()
             ], 400);
         }
+    }
+
+    private function checkUploadImage($wordGroup, $image)
+    {
+        $decodeImage = (new Base64FileExtractor)->extractBase64String($image);
+        $uploadImage = new UploadFile($decodeImage, 'image');
+        $fileName = md5(uniqid()).'.'.$uploadImage->guessExtension();
+        $mimeType = $uploadImage->getMimeType();
+
+        if ($uploadImage->getSize() > (3 * 1024 * 1024)) {
+            $errorsImage[] = 'Максимальный размер изображения 3 МБ';
+        }
+
+        if ($mimeType !== 'image/png' && $mimeType !== 'image/jpeg') {
+            $errorsImage[] = 'Изображение должно быть формата PNG или JPEG';
+        }
+
+        if (!empty($errorsImage)) {
+            return $errorsImage;
+        }
+
+        $folder = date('Y') . '/' . date('m');
+        $absolutePath = $this->getParameter('image_directory') . '/' . $folder;
+        $filenamePath = self::IMAGE_PATH . $folder . '/' . $fileName;
+
+        if (!file_exists($absolutePath)) {
+            mkdir($absolutePath, 644);
+        }
+
+        $uploadImage->move($absolutePath, $fileName);
+        $wordGroup->setImage($filenamePath);
+
+        return null;
     }
 
     /**
