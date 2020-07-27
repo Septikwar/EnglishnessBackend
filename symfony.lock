@@ -125,9 +125,6 @@
             "./config/packages/fos_rest.yaml"
         ]
     },
-    "gesdinet/jwt-refresh-token-bundle": {
-        "version": "v0.9.1"
-    },
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
