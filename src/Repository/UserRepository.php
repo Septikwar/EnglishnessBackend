@@ -4,7 +4,10 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -72,15 +75,41 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
-    public function findUserByEmailOrUsername($account)
+    public function findUserByEmail($account)
     {
         $qb = $this->_em->createQueryBuilder();
-        return $qb->select('u')
-                  ->where('u.email = :account')
-                  ->orWhere('u.username = :account')
-                  ->from(User::class, 'u')
-                  ->setParameter('account', $account)
-                  ->getQuery()
-                  ->getSingleResult();
+        try {
+            return $qb->select('u')
+                ->where('u.email = :account')
+                ->from(User::class, 'u')
+                ->setParameter('account', $account)
+                ->getQuery()
+                ->getSingleResult();
+        } catch (NoResultException $e) {
+            return new JsonResponse([
+                'data' => [],
+                'errorCode' => 0,
+                'errorMsgs' => 'Пользователь не найден'
+            ], 400);
+        } catch (NonUniqueResultException $e) {
+            return new JsonResponse([
+                'data' => [],
+                'errorCode' => 0,
+                'errorMsgs' => 'Найдено более одного пользователя'
+            ], 400);
+        }
+    }
+
+    public function findAllUsers(int $pagesize = 10, int $page = 1)
+    {
+        $qb = $this->_em->createQueryBuilder();
+
+        $qb
+            ->select('u')
+            ->from(User::class, 'u')
+            ->setFirstResult($pagesize * ($page - 1))
+            ->setMaxResults($pagesize);
+
+        return $qb->getQuery()->getResult();
     }
 }

@@ -64,6 +64,7 @@ class WordController extends AbstractFOSRestController
      * )
      * @param $id
      * @return JsonResponse
+     * TODO написать все через сериалайзер
      */
     public function getWord(int $id)
     {

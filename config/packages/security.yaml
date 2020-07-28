@@ -32,6 +32,11 @@ security:
             stateless: true
             anonymous: true
 
+        resetPassword:
+            pattern: ^/api/user/reset
+            stateless: true
+            anonymous: true
+
         doc:
             pattern: ^/api/doc
             stateless: true
@@ -53,5 +58,6 @@ security:
         - { path: ^/api/user/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/user/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/user/confirm, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/user/reset, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

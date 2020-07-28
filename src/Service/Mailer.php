@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Entity\User;
 use Swift_Message;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Twig\Environment;
 
 class Mailer
@@ -36,12 +37,44 @@ class Mailer
 
         $message = new Swift_Message();
         $message
-            ->setSubject('Вы успешно прошли регистрацию!')
+            ->setSubject('Пожалуйста, подтвердите регистрацию')
             ->setFrom(self::FROM_ADDRESS)
             ->setTo($user->getEmail())
             ->setBody($messageBody, 'text/html');
 
-        $this->swiftMailer->send($message);
+        return $this->swiftMailer->send($message);
+    }
+
+    public function sendResetPasswordMessage(User $user)
+    {
+        $messageBody = $this->twig->render('security/reset.html.twig', [
+            'user' => $user
+        ]);
+
+        $message = new Swift_Message();
+        $message
+            ->setSubject('Запрос на сброс пароля')
+            ->setFrom(self::FROM_ADDRESS)
+            ->setTo($user->getEmail())
+            ->setBody($messageBody, 'text/html');
+
+        return $this->swiftMailer->send($message);
+    }
+
+    public function successOfResetPassword(User $user)
+    {
+        $messageBody = $this->twig->render('security/successReset.html.twig', [
+            'user' => $user
+        ]);
+
+        $message = new Swift_Message();
+        $message
+            ->setSubject('Ваш пароль успешно изменен')
+            ->setFrom(self::FROM_ADDRESS)
+            ->setTo($user->getEmail())
+            ->setBody($messageBody, 'text/html');
+
+        return $this->swiftMailer->send($message);
     }
 
 }

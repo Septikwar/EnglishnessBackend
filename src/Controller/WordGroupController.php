@@ -99,6 +99,7 @@ class WordGroupController extends AbstractFOSRestController
      * )
      * @param ParamFetcherInterface $paramFetcher
      * @return JsonResponse
+     * TODO через сериалайзер
      */
     public function getAllWordGroups(ParamFetcherInterface $paramFetcher)
     {
