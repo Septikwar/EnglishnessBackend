@@ -279,7 +279,7 @@ class WordGroupController extends AbstractFOSRestController
         $filenamePath = self::IMAGE_PATH . $folder . '/' . $fileName;
 
         if (!file_exists($absolutePath)) {
-            mkdir($absolutePath, 644);
+            mkdir($absolutePath, 777);
         }
 
         $uploadImage->move($absolutePath, $fileName);
