@@ -388,7 +388,7 @@ class UserController extends AbstractFOSRestController
      * @param SerializerInterface $serializer
      * @return Response
      */
-    public function getUserInfo(SerializerInterface $serializer)
+    public function getCurrentUserInfo(SerializerInterface $serializer)
     {
         $user = $this->security->getUser();
 
@@ -401,7 +401,7 @@ class UserController extends AbstractFOSRestController
         }
 
         return new JsonResponse([
-            'data' => $serializer->serialize($user, 'json', ['groups' => 'public']),
+            'data' => $serializer->normalize($user, 'json', ['groups' => 'public']),
             'errorCode' => 0,
             'errorMsgs' => ''
         ], 200);
@@ -439,11 +439,40 @@ class UserController extends AbstractFOSRestController
         );
 
         return new JsonResponse([
-            'data' => $serializer->serialize($users, 'json', ['groups' => 'public']),
+            'data' => $serializer->normalize($users, 'json', ['groups' => 'public']),
             'errorCode' => 0,
             'errorMsgs' => ''
         ], 200);
     }
 
+    /**
+     * @View(serializerGroups={"public"})
+     * @Rest\Get("/user/{id}")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Вывод информации о пользователе по айди"
+     * )
+     * @SWG\Tag(name="User")
+     * @param SerializerInterface $serializer
+     * @return Response
+     */
+    public function getUserInfo(SerializerInterface $serializer, int $id)
+    {
+        $user = $this->repository->findOneById($id);
+
+        if (!isset($user) || empty($user)) {
+            return new JsonResponse([
+                'data' => [],
+                'errorCode' => 0,
+                'errorMsgs' => 'Пользователь не найден'
+            ], 400);
+        }
+
+        return new JsonResponse([
+            'data' => $serializer->normalize($user, 'json', ['groups' => 'public']),
+            'errorCode' => 0,
+            'errorMsgs' => ''
+        ], 200);
+    }
 
 }
