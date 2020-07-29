@@ -17,6 +17,7 @@ use FOS\RestBundle\Request\ParamFetcherInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -454,6 +455,7 @@ class UserController extends AbstractFOSRestController
      * )
      * @SWG\Tag(name="User")
      * @param SerializerInterface $serializer
+     * @param int $id
      * @return Response
      */
     public function getUserInfo(SerializerInterface $serializer, int $id)
@@ -475,4 +477,74 @@ class UserController extends AbstractFOSRestController
         ], 200);
     }
 
+    /**
+     * @IsGranted("ROLE_ADMIN")
+     * @View(serializerGroups={"public"})
+     * @Rest\Post("/user/ban/{id}")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Бан юзера"
+     * )
+     * @SWG\Tag(name="User")
+     * @param SerializerInterface $serializer
+     * @param int $id
+     * @return Response
+     */
+    public function banUser(SerializerInterface $serializer, int $id)
+    {
+        $user = $this->repository->findOneById($id);
+
+        if (!isset($user) || empty($user)) {
+            return new JsonResponse([
+                'data' => [],
+                'errorCode' => 0,
+                'errorMsgs' => 'Пользователь не найден'
+            ], 400);
+        }
+
+        $user->setEnabled(false);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+        return new JsonResponse([
+            'data' => '',
+            'errorCode' => 0,
+            'errorMsgs' => ''
+        ], 200);
+    }
+
+    /**
+     * @IsGranted("ROLE_ADMIN")
+     * @View(serializerGroups={"public"})
+     * @Rest\Post("/user/unban/{id}")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Анбан юзера"
+     * )
+     * @SWG\Tag(name="User")
+     * @param SerializerInterface $serializer
+     * @param int $id
+     * @return Response
+     * TODO Добавить поле для бана и причину в отдельной таблице
+     */
+    public function unbanUser(SerializerInterface $serializer, int $id)
+    {
+        $user = $this->repository->findOneById($id);
+
+        if (!isset($user) || empty($user)) {
+            return new JsonResponse([
+                'data' => [],
+                'errorCode' => 0,
+                'errorMsgs' => 'Пользователь не найден'
+            ], 400);
+        }
+
+        $user->setEnabled(true);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+        return new JsonResponse([
+            'data' => '',
+            'errorCode' => 0,
+            'errorMsgs' => ''
+        ], 200);
+    }
 }
