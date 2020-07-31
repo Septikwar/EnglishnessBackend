@@ -3,10 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\Validator\Constraints\UserPassword;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -76,11 +77,18 @@ class User implements UserInterface
      */
     private $enabled;
 
+    /**
+     * @Groups({"admin", "current"})
+     * @ORM\OneToMany(targetEntity=UserBans::class, mappedBy="userId")
+     */
+    private $ban;
+
 
     public function __construct()
     {
         $this->roles = [self::ROLE_USER];
         $this->enabled = false;
+        $this->ban = new ArrayCollection();
     }
 
 
@@ -197,5 +205,36 @@ class User implements UserInterface
     public function setUsername($username): void
     {
         $this->username = $username;
+    }
+
+    /**
+     * @return Collection|UserBans[]
+     */
+    public function getBan(): Collection
+    {
+        return $this->ban;
+    }
+
+    public function addBan(UserBans $ban): self
+    {
+        if (!$this->ban->contains($ban)) {
+            $this->ban[] = $ban;
+            $ban->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBan(UserBans $ban): self
+    {
+        if ($this->ban->contains($ban)) {
+            $this->ban->removeElement($ban);
+            // set the owning side to null (unless already changed)
+            if ($ban->getUserId() === $this) {
+                $ban->setUserId(null);
+            }
+        }
+
+        return $this;
     }
 }

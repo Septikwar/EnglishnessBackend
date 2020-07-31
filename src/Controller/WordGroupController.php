@@ -26,8 +26,6 @@ use Symfony\Component\HttpFoundation\Request;
 class WordGroupController extends AbstractFOSRestController
 {
 
-    CONST IMAGE_PATH = '/uploads/images/';
-
     /**
      * @var WordGroupRepository
      */
@@ -149,20 +147,6 @@ class WordGroupController extends AbstractFOSRestController
             $form->handleRequest($request);
             $form->submit($data);
             if ($form->isValid()) {
-
-
-                if (!empty($data['image'])) {
-                    $errorsImage = $this->checkUploadImage($wordGroup, $data['image']);
-
-                    if (!empty($errorsImage)) {
-                        return new JsonResponse([
-                            'data' => '',
-                            'errorCode' => 0,
-                            'errorMsgs' => $errorsImage
-                        ], 400);
-                    }
-                }
-
                 $this->em->persist($wordGroup);
                 $this->em->flush();
 
@@ -219,19 +203,6 @@ class WordGroupController extends AbstractFOSRestController
             $form->handleRequest($request);
             $form->submit($data);
             if ($form->isValid()) {
-
-                if (!empty($data['image'])) {
-                    $errorsImage = $this->checkUploadImage($wordGroup, $data['image']);
-
-                    if (!empty($errorsImage)) {
-                        return new JsonResponse([
-                            'data' => '',
-                            'errorCode' => 0,
-                            'errorMsgs' => $errorsImage
-                        ], 400);
-                    }
-                }
-
                 $this->em->persist($wordGroup);
                 $this->em->flush();
 
@@ -253,39 +224,6 @@ class WordGroupController extends AbstractFOSRestController
                 'errorMsgs' => $e->getMessage()
             ], 400);
         }
-    }
-
-    private function checkUploadImage($wordGroup, $image)
-    {
-        $decodeImage = (new Base64FileExtractor)->extractBase64String($image);
-        $uploadImage = new UploadFile($decodeImage, 'image');
-        $fileName = md5(uniqid()).'.'.$uploadImage->guessExtension();
-        $mimeType = $uploadImage->getMimeType();
-
-        if ($uploadImage->getSize() > (3 * 1024 * 1024)) {
-            $errorsImage[] = 'Максимальный размер изображения 3 МБ';
-        }
-
-        if ($mimeType !== 'image/png' && $mimeType !== 'image/jpeg') {
-            $errorsImage[] = 'Изображение должно быть формата PNG или JPEG';
-        }
-
-        if (!empty($errorsImage)) {
-            return $errorsImage;
-        }
-
-        $folder = date('Y') . '/' . date('m');
-        $absolutePath = $this->getParameter('image_directory') . '/' . $folder;
-        $filenamePath = self::IMAGE_PATH . $folder . '/' . $fileName;
-
-        if (!file_exists($absolutePath)) {
-            mkdir($absolutePath, 777);
-        }
-
-        $uploadImage->move($absolutePath, $fileName);
-        $wordGroup->setImage($filenamePath);
-
-        return null;
     }
 
     /**

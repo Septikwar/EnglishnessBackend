@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\UserBans;
+use App\Form\User\BanType;
 use App\Form\User\UserResetPasswordType;
 use App\Form\User\UserType;
+use App\Repository\UserBansRepository;
 use App\Repository\UserRepository;
 use App\Service\CodeGenerator;
 use App\Service\Mailer;
@@ -470,6 +473,15 @@ class UserController extends AbstractFOSRestController
             ], 400);
         }
 
+        $currentUser = $this->security->getUser();
+
+        if ($currentUser === $user || in_array('ROLE_ADMIN', $currentUser->getRoles())) {
+            return new JsonResponse([
+                'data' => $serializer->normalize($user, 'json', ['groups' => ['public', 'current', 'admin']]),
+                'errorCode' => 0,
+                'errorMsgs' => ''
+            ], 200);
+        }
         return new JsonResponse([
             'data' => $serializer->normalize($user, 'json', ['groups' => 'public']),
             'errorCode' => 0,
@@ -480,36 +492,54 @@ class UserController extends AbstractFOSRestController
     /**
      * @IsGranted("ROLE_ADMIN")
      * @View(serializerGroups={"public"})
-     * @Rest\Post("/user/ban/{id}")
+     * @Rest\Post("/user/ban")
+     * @SWG\Parameter(
+     *     name="body",
+     *     in="body",
+     *     @SWG\Schema(
+     *         @SWG\Property(property="userId", type="string"),
+     *         @SWG\Property(property="message", type="string"),
+     *         @SWG\Property(property="date", type="string")
+     *     )
+     * )
      * @SWG\Response(
      *     response="200",
      *     description="Бан юзера"
      * )
      * @SWG\Tag(name="User")
-     * @param SerializerInterface $serializer
-     * @param int $id
+     * @param Request $request
      * @return Response
      */
-    public function banUser(SerializerInterface $serializer, int $id)
+    public function banUser(Request $request)
     {
-        $user = $this->repository->findOneById($id);
+        $ban = new UserBans();
 
-        if (!isset($user) || empty($user)) {
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            $form = $this->createForm(BanType::class, $ban);
+
+            $form->submit($data);
+            if ($form->isValid()) {
+                $ban->setBan(true);
+                $this->entityManager->persist($ban);
+                $this->entityManager->flush();
+
+                return new JsonResponse([
+                    'data' => [],
+                    'errorCode' => 0,
+                    'errorMsgs' => ''
+                ], 200);
+            }
+        } catch (NotNullConstraintViolationException $e) {
             return new JsonResponse([
                 'data' => [],
                 'errorCode' => 0,
-                'errorMsgs' => 'Пользователь не найден'
+                'errorMsgs' => 'Вы не заполнили обязательные поля'
             ], 400);
         }
 
-        $user->setEnabled(false);
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-        return new JsonResponse([
-            'data' => '',
-            'errorCode' => 0,
-            'errorMsgs' => ''
-        ], 200);
+        return $form;
     }
 
     /**
@@ -521,25 +551,24 @@ class UserController extends AbstractFOSRestController
      *     description="Анбан юзера"
      * )
      * @SWG\Tag(name="User")
-     * @param SerializerInterface $serializer
+     * @param UserBansRepository $userBansRepository
      * @param int $id
      * @return Response
-     * TODO Добавить поле для бана и причину в отдельной таблице
      */
-    public function unbanUser(SerializerInterface $serializer, int $id)
+    public function unbanUser(UserBansRepository $userBansRepository, int $id)
     {
-        $user = $this->repository->findOneById($id);
+        $ban = $userBansRepository->findOneById($id);
 
-        if (!isset($user) || empty($user)) {
+        if (!isset($ban) || empty($ban)) {
             return new JsonResponse([
                 'data' => [],
                 'errorCode' => 0,
-                'errorMsgs' => 'Пользователь не найден'
+                'errorMsgs' => 'Бан не найден'
             ], 400);
         }
 
-        $user->setEnabled(true);
-        $this->entityManager->persist($user);
+        $ban->setBan(false);
+        $this->entityManager->persist($ban);
         $this->entityManager->flush();
         return new JsonResponse([
             'data' => '',
