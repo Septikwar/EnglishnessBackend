@@ -21,7 +21,7 @@ class FileController extends AbstractFOSRestController
     CONST IMAGE_PATH = '/uploads/images/';
 
     /**
-     * @SWG\Tag(name="Groups")
+     * @SWG\Tag(name="File")
      * @Rest\Post("/file")
      * @SWG\Parameter(
      *     name="body",
@@ -99,7 +99,7 @@ class FileController extends AbstractFOSRestController
         $filenamePath = self::IMAGE_PATH . $folder . '/' . $fileName;
 
         if (!file_exists($absolutePath)) {
-            mkdir($absolutePath, 777);
+            mkdir($absolutePath, 0777);
         }
 
         $uploadImage->move($absolutePath, $fileName);
