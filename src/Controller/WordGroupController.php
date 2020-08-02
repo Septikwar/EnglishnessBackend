@@ -122,7 +122,8 @@ class WordGroupController extends AbstractFOSRestController
      *     name="body",
      *     in="body",
      *     @SWG\Schema(
-     *         @SWG\Property(property="name", type="string")
+     *         @SWG\Property(property="name", type="string"),
+     *         @SWG\Property(property="image", type="string")
      *     )
      * )
      * @SWG\Response(
@@ -169,7 +170,8 @@ class WordGroupController extends AbstractFOSRestController
      *     name="body",
      *     in="body",
      *     @SWG\Schema(
-     *         @SWG\Property(property="name", type="string")
+     *         @SWG\Property(property="name", type="string"),
+     *         @SWG\Property(property="image", type="string")
      *     )
      * )
      * @SWG\Response(
