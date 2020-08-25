@@ -9,6 +9,7 @@ use App\Form\FileType;
 use App\Repository\FileRepository;
 use App\Service\Base64FileExtractor;
 use App\Service\UploadFile;
+use Doctrine\DBAL\Exception\NotNullConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -17,6 +18,7 @@ use Swagger\Annotations as SWG;
 use Symfony\Component\Form\FormInterface as FormInterfaceAlias;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @Rest\Route("/api")
@@ -57,6 +59,7 @@ class FileController extends AbstractFOSRestController
      * )
      * @param Request $request
      * @return string
+     * TODO навести порядок в сервисах файла
      */
     public function addFile(Request $request)
     {
@@ -224,9 +227,10 @@ class FileController extends AbstractFOSRestController
      */
     public function deleteFile(int $id)
     {
+        throw new BadRequestHttpException('не нул', null, 400);
+
         try {
             $file = $this->repository->findOneById($id);
-
             if ($file !== null) {
                 $path = $_SERVER['DOCUMENT_ROOT'] . $file->getUrl();
                 $this->repository->deleteFile($id);

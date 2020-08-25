@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200714204939 extends AbstractMigration
+final class Version20200823193753 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -22,9 +22,17 @@ final class Version20200714204939 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
-        $this->addSql('DROP SEQUENCE seq_user_id CASCADE');
-        $this->addSql('ALTER TABLE "user" ADD confirmation_code VARCHAR(255) DEFAULT NULL');
-        $this->addSql('ALTER TABLE "user" ADD enabled BOOLEAN NOT NULL');
+        $this->addSql('CREATE SEQUENCE "user_id_seq" INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE TABLE "user" (
+	id int4 NOT NULL,
+	username varchar(100) NOT NULL,
+	email varchar(180) NOT NULL,
+	roles json NOT NULL,
+	"password" varchar(255) NOT NULL,
+	confirmation_code varchar(255) NULL DEFAULT NULL::character varying,
+	enabled bool NOT NULL,
+	CONSTRAINT user_pkey PRIMARY KEY (id)
+)');
     }
 
     public function down(Schema $schema) : void
@@ -32,8 +40,7 @@ final class Version20200714204939 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'postgresql', 'Migration can only be executed safely on \'postgresql\'.');
 
-        $this->addSql('CREATE SEQUENCE seq_user_id INCREMENT BY 1 MINVALUE 1 START 1');
-        $this->addSql('ALTER TABLE "user" DROP confirmation_code');
-        $this->addSql('ALTER TABLE "user" DROP enabled');
+        $this->addSql('DROP SEQUENCE "user_id_seq" CASCADE');
+        $this->addSql('DROP TABLE "user" CASCADE ');
     }
 }
